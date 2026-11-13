@@ -47,10 +47,21 @@ func (gb *Gameboy) Step() int {
 		gb.MMU.Write(gb.CPU.BC(), gb.CPU.A)
 		return 8
 	case 0x03: // INC BC
+		bc := gb.CPU.BC() + 1
+		gb.CPU.B = uint8(bc >> 8) 
+		gb.CPU.C = uint8(bc)
 		return 8
 	case 0x04: // INC B
+		gb.CPU.CalH(gb.CPU.B, 1, "+")
+		gb.CPU.B += 1
+		gb.CPU.CalZ(gb.CPU.B)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x05: // DEC B
+		gb.CPU.CalH(gb.CPU.B, 1, "-")
+		gb.CPU.B -= 1
+		gb.CPU.CalZ(gb.CPU.B)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x06: // LD B, d8
 		gb.CPU.B = gb.MMU.Read(gb.CPU.PC)
@@ -66,10 +77,21 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.A = gb.MMU.Read(gb.CPU.BC())
 		return 8
 	case 0x0B: // DEC BC
+		BC := gb.CPU.BC() - 1
+		gb.CPU.B = uint8(BC>>8)
+		gb.CPU.C = uint8(BC)
 		return 8
 	case 0x0C: // INC C
+		gb.CPU.CalH(gb.CPU.C, 1, "+")
+		gb.CPU.C += 1
+		gb.CPU.CalZ(gb.CPU.C)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x0D: // DEC C
+		gb.CPU.CalH(gb.CPU.C, 1, "-")
+		gb.CPU.C -= 1
+		gb.CPU.CalZ(gb.CPU.C)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x0E: // LD C, d8
 		d8byte := gb.MMU.Read(gb.CPU.PC)
@@ -97,10 +119,21 @@ func (gb *Gameboy) Step() int {
 		gb.MMU.Write(gb.CPU.DE(),gb.CPU.A)
 		return 8
 	case 0x13: // INC DE
+		de := gb.CPU.DE() + 1
+		gb.CPU.D = uint8(de >> 8) 
+		gb.CPU.E = uint8(de)
 		return 8
 	case 0x14: // INC D
+		gb.CPU.CalH(gb.CPU.D, 1, "+")
+		gb.CPU.D += 1
+		gb.CPU.CalZ(gb.CPU.D)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x15: // DEC D
+		gb.CPU.CalH(gb.CPU.D, 1, "-")
+		gb.CPU.D -= 1
+		gb.CPU.CalZ(gb.CPU.D)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x16: // LD D, d8
 		gb.CPU.D = gb.MMU.Read(gb.CPU.PC)
@@ -116,10 +149,21 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.A = gb.MMU.Read(gb.CPU.DE())
 		return 8
 	case 0x1B: // DEC DE
+		de := gb.CPU.DE() - 1
+		gb.CPU.D = uint8(de >> 8) 
+		gb.CPU.E = uint8(de)
 		return 8
 	case 0x1C: // INC E
+		gb.CPU.CalH(gb.CPU.E, 1, "+")
+		gb.CPU.E += 1
+		gb.CPU.CalZ(gb.CPU.E)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x1D: // DEC E
+		gb.CPU.CalH(gb.CPU.E, 1, "-")
+		gb.CPU.E -= 1
+		gb.CPU.CalZ(gb.CPU.E)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x1E: // LD E, d8
 		gb.CPU.E = gb.MMU.Read(gb.CPU.PC)
@@ -151,11 +195,17 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.H = uint8(HL>>8)
 		gb.CPU.L = uint8(HL)
 		return 8
-	case 0x24: // INC H FLAGS MISSING MALAKA
-		gb.CPU.H++
+	case 0x24: // INC H
+		gb.CPU.CalH(gb.CPU.H, 1, "+")
+		gb.CPU.H += 1
+		gb.CPU.CalZ(gb.CPU.H)
+		gb.CPU.SetN(0)
 		return 4
-	case 0x25: // DEC H FLAGS MISSING MALAKA
-		gb.CPU.H--
+	case 0x25: // DEC H
+		gb.CPU.CalH(gb.CPU.H, 1, "-")
+		gb.CPU.H -= 1
+		gb.CPU.CalZ(gb.CPU.H)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x26: // LD H, d8
 		gb.CPU.H = gb.MMU.Read(gb.CPU.PC)
@@ -175,10 +225,22 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.L = uint8(HL)
 		return 8
 	case 0x2B: // DEC HL
+		HL := gb.CPU.HL()
+		HL--
+		gb.CPU.H = uint8(HL>>8)
+		gb.CPU.L = uint8(HL)
 		return 8
 	case 0x2C: // INC L
+		gb.CPU.CalH(gb.CPU.L, 1, "+")
+		gb.CPU.L += 1
+		gb.CPU.CalZ(gb.CPU.L)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x2D: // DEC L
+		gb.CPU.CalH(gb.CPU.L, 1, "-")
+		gb.CPU.L -= 1
+		gb.CPU.CalZ(gb.CPU.L)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x2E: // LD L, d8
 		gb.CPU.L = gb.MMU.Read(gb.CPU.PC)
@@ -200,10 +262,23 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.L = uint8(HL)
 		return 8
 	case 0x33: // INC SP
+		gb.CPU.SP += 1
 		return 8
 	case 0x34: // INC (HL)
+		HL := gb.MMU.Read(gb.CPU.HL())
+		gb.CPU.CalH(gb.MMU.Read(gb.CPU.HL()),1,"+")
+		HL++
+		gb.MMU.Write(gb.CPU.HL(),HL)
+		gb.CPU.CalZ(HL)
+		gb.CPU.SetN(0)
 		return 12
 	case 0x35: // DEC (HL)
+		HL := gb.MMU.Read(gb.CPU.HL())
+		gb.CPU.CalH(gb.MMU.Read(gb.CPU.HL()),1,"-")
+		HL--
+		gb.MMU.Write(gb.CPU.HL(),HL)
+		gb.CPU.CalZ(HL)
+		gb.CPU.SetN(1)
 		return 12
 	case 0x36: // LD (HL), d8
 		gb.MMU.Write(gb.CPU.HL(), gb.MMU.Read(gb.CPU.PC))
@@ -223,10 +298,19 @@ func (gb *Gameboy) Step() int {
 		gb.CPU.L = uint8(HL)
 		return 8
 	case 0x3B: // DEC SP
+		gb.CPU.SP-=1
 		return 8
 	case 0x3C: // INC A
+		gb.CPU.CalH(gb.CPU.A, 1, "+")
+		gb.CPU.A += 1
+		gb.CPU.CalZ(gb.CPU.A)
+		gb.CPU.SetN(0)
 		return 4
 	case 0x3D: // DEC A
+		gb.CPU.CalH(gb.CPU.A, 1, "-")
+		gb.CPU.A -= 1
+		gb.CPU.CalZ(gb.CPU.A)
+		gb.CPU.SetN(1)
 		return 4
 	case 0x3E: // LD A, d8
 		gb.CPU.A = gb.MMU.Read(gb.CPU.PC)
@@ -438,139 +522,527 @@ func (gb *Gameboy) Step() int {
 
 	// --- 0x8X ---
 	case 0x80: // ADD A, B
-		gb.CPU.A += gb.CPU.B
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.B)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.B , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x81: // ADD A, C
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.C)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.C , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x82: // ADD A, D
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.D)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.D , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x83: // ADD A, E
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.E)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.E , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x84: // ADD A, H
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.H)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.H , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x85: // ADD A, L
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.L)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.L , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x86: // ADD A, (HL)
+		hlVal := gb.MMU.Read(gb.CPU.HL())
+		res := uint16(gb.CPU.A) + uint16(hlVal)
+		gb.CPU.CalH(gb.CPU.A , hlVal, "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 8
 	case 0x87: // ADD A, A
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.A)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.A , "+")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x88: // ADC A, B
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.B) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.B , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x89: // ADC A, C
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.C) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.C , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x8A: // ADC A, D
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.D) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.D , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x8B: // ADC A, E
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.E) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.E , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x8C: // ADC A, H
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.H) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.H , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x8D: // ADC A, L
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.L) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.L , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x8E: // ADC A, (HL)
+		hlVal := gb.MMU.Read(gb.CPU.HL())
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(hlVal) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , hlVal, "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 8
 	case 0x8F: // ADC A, A
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) + uint16(gb.CPU.A) + uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.A , "+", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(0)
+		gb.CPU.A = uint8(res)
 		return 4
 
 	// --- 0x9X ---
 	case 0x90: // SUB B
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.B)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.B , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x91: // SUB C
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.C)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.C , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x92: // SUB D
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.D)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.D , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x93: // SUB E
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.E)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.E , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x94: // SUB H
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.H)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.H , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x95: // SUB L
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.L)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.L , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x96: // SUB (HL)
+		hlVal := gb.MMU.Read(gb.CPU.HL())
+		res := uint16(gb.CPU.A) - uint16(hlVal)
+		gb.CPU.CalH(gb.CPU.A , hlVal , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 8
 	case 0x97: // SUB A
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.A)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.A , "-")
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x98: // SBC A, B
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.B) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.B , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x99: // SBC A, C
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.C) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.C , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x9A: // SBC A, D
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.D) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.D , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x9B: // SBC A, E
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.E) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.E , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x9C: // SBC A, H
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.H) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.H , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x9D: // SBC A, L
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.L) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.L , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 	case 0x9E: // SBC A, (HL)
+		hlVal := gb.MMU.Read(gb.CPU.HL())
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(hlVal) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , hlVal , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 8
 	case 0x9F: // SBC A, A
+		carry := gb.CPU.ReadC()
+		res := uint16(gb.CPU.A) - uint16(gb.CPU.A) - uint16(carry)
+		gb.CPU.CalH(gb.CPU.A , gb.CPU.A , "-", carry)
+		gb.CPU.CalC(res)
+		gb.CPU.CalZ(uint8(res))
+		gb.CPU.SetN(1)
+		gb.CPU.A = uint8(res)
 		return 4
 
 	// --- 0xAX ---
 	case 0xA0: // AND B
+		res := gb.CPU.A & gb.CPU.B
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA1: // AND C
+		res := gb.CPU.A & gb.CPU.C
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA2: // AND D
+		res := gb.CPU.A & gb.CPU.D
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA3: // AND E
+		res := gb.CPU.A & gb.CPU.E
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA4: // AND H
+		res := gb.CPU.A & gb.CPU.H
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA5: // AND L
+		res := gb.CPU.A & gb.CPU.L
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA6: // AND (HL)
+		res := gb.CPU.A & gb.MMU.Read(gb.CPU.HL())
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 8
 	case 0xA7: // AND A
+		res := gb.CPU.A & gb.CPU.A
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(1)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA8: // XOR B
+		res := gb.CPU.A ^ gb.CPU.B
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xA9: // XOR C
+		res := gb.CPU.A ^ gb.CPU.C
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xAA: // XOR D
+		res := gb.CPU.A ^ gb.CPU.D
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xAB: // XOR E
+		res := gb.CPU.A ^ gb.CPU.E
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xAC: // XOR H
+		res := gb.CPU.A ^ gb.CPU.H
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xAD: // XOR L
+		res := gb.CPU.A ^ gb.CPU.L
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xAE: // XOR (HL)
+		res := gb.CPU.A ^ gb.MMU.Read(gb.CPU.HL())
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 8
 	case 0xAF: // XOR A
+		res := gb.CPU.A ^ gb.CPU.L
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 
 	// --- 0xBX ---
 	case 0xB0: // OR B
+		res := gb.CPU.A | gb.CPU.B
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB1: // OR C
+		res := gb.CPU.A | gb.CPU.C
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB2: // OR D
+		res := gb.CPU.A | gb.CPU.D
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB3: // OR E
+		res := gb.CPU.A | gb.CPU.E
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB4: // OR H
+		res := gb.CPU.A | gb.CPU.H
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB5: // OR L
+		res := gb.CPU.A | gb.CPU.L
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB6: // OR (HL)
+		res := gb.CPU.A | gb.MMU.Read(gb.CPU.HL())
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 8
 	case 0xB7: // OR A
+		res := gb.CPU.A | gb.CPU.A
+		gb.CPU.CalZ(res)
+		gb.CPU.SetN(0)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
+		gb.CPU.A = res
 		return 4
 	case 0xB8: // CP B
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.B)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.B, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.B))
 		return 4
 	case 0xB9: // CP C
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.C)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.C, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.C))
 		return 4
 	case 0xBA: // CP D
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.D)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.D, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.D))
 		return 4
 	case 0xBB: // CP E
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.E)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.E, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.E))
 		return 4
 	case 0xBC: // CP H
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.H)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.H, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.H))
 		return 4
 	case 0xBD: // CP L
+		gb.CPU.CalZ(gb.CPU.A - gb.CPU.L)
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.L, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.CPU.L))
 		return 4
 	case 0xBE: // CP (HL)
+		gb.CPU.CalZ(gb.CPU.A - gb.MMU.Read(gb.CPU.HL()))
+		gb.CPU.SetN(1)
+		gb.CPU.CalH(gb.CPU.A, gb.CPU.C, "-")
+		gb.CPU.CalC(uint16(gb.CPU.A) - uint16(gb.MMU.Read(gb.CPU.HL())))
 		return 8
 	case 0xBF: // CP A
+		//no need for calculation since A always equals A which means A-A = 0 which means Z will always br 1 and H C will be 0
+		gb.CPU.SetZ(1)
+		gb.CPU.SetN(1)
+		gb.CPU.SetH(0)
+		gb.CPU.SetC(0)
 		return 4
 
 	// --- 0xCX ---
