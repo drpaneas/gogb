@@ -42,7 +42,7 @@ Topics covered:
 **Quality:** Excellent. Community-maintained, constantly updated.
 
 ### Game Boy CPU Manual
-**https://gekkio.fi/files/gb-docs/gbctr.pdf**
+**http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf**
 
 Gekkio's comprehensive CPU manual with cycle-accurate timing information.
 
